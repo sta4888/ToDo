@@ -1,0 +1,48 @@
+networks:
+  my-ToDo:
+
+
+services:
+    # сервис основного приложения
+    app:
+        build: .
+        image: over-voltage
+        container_name: app
+        env_file:
+            - .env
+        volumes:
+            - ./src:/src
+            - ./logs:/logs
+            - ./docs:/docs
+        working_dir: /src/
+        command: python manage.py runserver 0.0.0.0:8000
+        ports:
+            - "8000:8000"
+        networks:
+            - my-ToDo
+        links:
+            - db
+        depends_on:
+            - db
+
+    # база данных
+    db:
+        image: postgres:15-alpine
+        container_name: db
+        environment:
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        ports:
+            - "54321:5432"
+        # https://docs.docker.com/compose/compose-file/compose-file-v3/#healthcheck
+        healthcheck:
+            # https://www.postgresql.org/docs/current/app-pg-isready.html
+            test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        restart: on-failure
+        networks:
+            - my-ToDo
+
