@@ -23,8 +23,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 
 ADD ./src /src
-ADD ./docs /docs
-ADD ./logs /logs
 WORKDIR /src
 
 # root is used as a hotfix for package introspection problem
